@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { UnsubscribeConfirm } from "./unsubscribe-confirm";
 
 export default async function UnsubscribePage({
   searchParams,
@@ -30,18 +31,5 @@ export default async function UnsubscribePage({
     );
   }
 
-  // Perform unsubscribe
-  await supabase
-    .from("organizations")
-    .update({ subscription_status: "cancelled" })
-    .eq("unsubscribe_token", token);
-
-  return (
-    <div className="p-8 text-center">
-      <h2 className="text-xl font-bold">Unsubscribed</h2>
-      <p className="text-muted-foreground mt-2">
-        {org.name} has been unsubscribed from GrantRadar. You won't receive any more digests.
-      </p>
-    </div>
-  );
+  return <UnsubscribeConfirm token={token} orgName={org.name} />;
 }

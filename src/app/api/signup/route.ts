@@ -11,6 +11,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  // Validate email format
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
+  }
+
+  // Length limits
+  if (name.length > 200 || email.length > 200) {
+    return NextResponse.json({ error: "Name or email too long" }, { status: 400 });
+  }
+
+  if (typeof geography_keywords === "string" && geography_keywords.length > 500) {
+    return NextResponse.json({ error: "Geography keywords too long" }, { status: 400 });
+  }
+
   // Validate categories
   const validCategories = categories.filter((c: string) =>
     (GRANT_CATEGORIES as readonly string[]).includes(c)

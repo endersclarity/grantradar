@@ -9,6 +9,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing token" }, { status: 400 });
   }
 
+  if (typeof geography_keywords === "string" && geography_keywords.length > 500) {
+    return NextResponse.json({ error: "Geography keywords too long" }, { status: 400 });
+  }
+
   const validCategories = (categories || []).filter((c: string) =>
     (GRANT_CATEGORIES as readonly string[]).includes(c)
   );
