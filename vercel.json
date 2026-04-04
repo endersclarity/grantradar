@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/sync-grants",
+      "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/send-digests",
+      "schedule": "50 14 * * 1"
+    }
+  ]
+}
