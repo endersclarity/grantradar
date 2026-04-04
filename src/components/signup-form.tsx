@@ -76,22 +76,25 @@ export function SignupForm() {
           </div>
           <div className="space-y-2">
             <Label>Grant Categories (select all that apply)</Label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-wrap gap-2">
               {GRANT_CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   type="button"
                   onClick={() => toggleCategory(cat)}
-                  className={`text-left text-sm px-3 py-2.5 rounded-md border transition-colors min-h-[44px] ${
+                  className={`text-sm px-3 py-1.5 rounded-full border transition-colors min-h-[36px] ${
                     selectedCategories.includes(cat)
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-background border-border hover:bg-muted"
+                      ? "bg-primary text-primary-foreground border-primary font-medium"
+                      : "bg-background border-border hover:bg-muted text-muted-foreground"
                   }`}
                 >
                   {cat}
                 </button>
               ))}
             </div>
+            {selectedCategories.length > 0 && (
+              <p className="text-xs text-primary">{selectedCategories.length} selected</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="geo">Geography Keywords (comma-separated, optional)</Label>
