@@ -35,6 +35,17 @@ export async function POST(request: NextRequest) {
     .map((s: string) => s.trim())
     .filter(Boolean);
 
+  // Check for existing org with this email
+  const { data: existing } = await supabase
+    .from("organizations")
+    .select("id")
+    .eq("email", email)
+    .single();
+
+  if (existing) {
+    return NextResponse.json({ error: "This email is already registered. Check your inbox for a verification link." }, { status: 409 });
+  }
+
   const { data, error } = await supabase
     .from("organizations")
     .insert({
@@ -55,8 +66,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const baseUrl = process.env.BASE_URL || "https://grantradar-sable.vercel.app";
-  await sendVerificationEmail(email, name, `${baseUrl}/api/verify-email?token=${data.email_verify_token}`);
+  try {
+    const baseUrl = process.env.BASE_URL || "https://grantradar-sable.vercel.app";
+    await sendVerificationEmail(email, name, `${baseUrl}/api/verify-email?token=${data.email_verify_token}`);
+  } catch {
+    // Email send failed but signup succeeded — don't fail the whole request
+    console.error("Failed to send verification email to", email);
+  }
 
   return NextResponse.json({ success: true, id: data.id });
 }
