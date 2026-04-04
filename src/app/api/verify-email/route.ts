@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("token");
 
   if (!token) {
-    return NextResponse.json({ error: "Missing verification token" }, { status: 400 });
+    return NextResponse.redirect(new URL("/?verified=invalid", request.url));
   }
 
   const { data: org, error: fetchError } = await supabase
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     .single();
 
   if (fetchError || !org) {
-    return NextResponse.json({ error: "Invalid or expired verification link" }, { status: 404 });
+    return NextResponse.redirect(new URL("/?verified=invalid", request.url));
   }
 
   if (org.email_verified) {

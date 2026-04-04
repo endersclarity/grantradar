@@ -51,6 +51,11 @@ export default async function Home({
             <p className="text-blue-800 font-medium">Your email is already verified. Digests arrive every Monday.</p>
           </div>
         )}
+        {params.verified === "invalid" && (
+          <div className="mb-8 p-4 rounded-lg bg-red-50 border border-red-200 text-center">
+            <p className="text-red-800 font-medium">Verification link is invalid or expired. Please sign up again.</p>
+          </div>
+        )}
         {params.upgraded === "success" && (
           <div className="mb-8 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-center">
             <p className="text-emerald-800 font-medium">Welcome to Pro! You now have AI fit scores and daily alerts.</p>
