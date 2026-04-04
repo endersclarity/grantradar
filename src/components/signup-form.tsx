@@ -68,11 +68,11 @@ export function SignupForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Organization Name</Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required className="h-11" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11" />
           </div>
           <div className="space-y-2">
             <Label>Grant Categories (select all that apply)</Label>
@@ -82,7 +82,7 @@ export function SignupForm() {
                   key={cat}
                   type="button"
                   onClick={() => toggleCategory(cat)}
-                  className={`text-left text-sm px-3 py-2 rounded-md border transition-colors ${
+                  className={`text-left text-sm px-3 py-2.5 rounded-md border transition-colors min-h-[44px] ${
                     selectedCategories.includes(cat)
                       ? "bg-primary text-primary-foreground border-primary"
                       : "bg-background border-border hover:bg-muted"
@@ -100,13 +100,14 @@ export function SignupForm() {
               value={geoKeywords}
               onChange={(e) => setGeoKeywords(e.target.value)}
               placeholder="e.g. Nevada County, Northern California, Statewide"
+              className="h-11"
             />
             <p className="text-xs text-muted-foreground">
               We'll match grants mentioning these areas. Leave blank to get statewide grants only.
             </p>
           </div>
           {errorMsg && <p className="text-sm text-red-600">{errorMsg}</p>}
-          <Button type="submit" className="w-full" disabled={status === "loading" || selectedCategories.length === 0}>
+          <Button type="submit" className="w-full h-12 text-base" disabled={status === "loading" || selectedCategories.length === 0}>
             {status === "loading" ? "Signing up..." : "Get Free Weekly Digest"}
           </Button>
           <p className="text-xs text-center text-muted-foreground">
