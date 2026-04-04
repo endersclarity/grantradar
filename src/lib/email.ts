@@ -1,7 +1,11 @@
 import { Resend } from "resend";
 import type { MatchedGrant } from "./matching";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let _resend: Resend | null = null;
+function getResend(): Resend {
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY);
+  return _resend;
+}
 
 function truncate(text: string | null, len: number): string {
   if (!text) return "";
@@ -82,7 +86,7 @@ export async function sendDigestEmail(
 
   const text = renderDigestText(orgName, grants, settingsUrl, unsubscribeUrl, trialBanner);
 
-  const { data, error } = await resend.emails.send({
+  const { data, error } = await getResend().emails.send({
     from: "GrantRadar <digest@grantradar.com>",
     to,
     subject: `GrantRadar \u2014 ${grants.length} grants for ${orgName} (Week of ${weekOf})`,
@@ -98,7 +102,7 @@ export async function sendDigestEmail(
 }
 
 export async function sendConfirmationEmail(to: string, orgName: string): Promise<void> {
-  await resend.emails.send({
+  await getResend().emails.send({
     from: "GrantRadar <hello@grantradar.com>",
     to,
     subject: `Welcome to GrantRadar, ${orgName}!`,
