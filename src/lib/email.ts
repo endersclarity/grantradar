@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import type { MatchedGrant } from "./matching";
+import { renderDigestHtml } from "./email-templates";
 
 let _resend: Resend | null = null;
 function getResend(): Resend {
@@ -28,24 +29,17 @@ function formatGrantLine(grant: MatchedGrant, includePurpose: boolean): string {
   return line;
 }
 
-export function renderDigestText(
+function renderDigestText(
   orgName: string,
   grants: MatchedGrant[],
   settingsUrl: string,
-  unsubscribeUrl: string,
-  trialBanner: boolean
+  unsubscribeUrl: string
 ): string {
   const closingSoon = grants.filter((g) => g.section === "closing_soon");
   const newThisWeek = grants.filter((g) => g.section === "new_this_week");
   const allMatching = grants.filter((g) => g.section === "all_matching");
 
   let body = "";
-
-  if (trialBanner) {
-    body += "--- YOUR FREE TRIAL HAS ENDED ---\n\n";
-    body += "Subscribe for $49/mo to keep receiving your weekly grant digest.\n";
-    body += `Subscribe now: ${process.env.BASE_URL}/api/checkout?org=${encodeURIComponent(orgName)}\n\n`;
-  }
 
   if (closingSoon.length > 0) {
     body += "--- CLOSING SOON ---\n\n";
@@ -77,20 +71,27 @@ export async function sendDigestEmail(
   orgName: string,
   grants: MatchedGrant[],
   unsubscribeToken: string,
-  trialBanner: boolean
+  showUpgradeBanner: boolean
 ): Promise<{ id: string } | null> {
-  const baseUrl = process.env.BASE_URL || "https://grantradar.com";
+  const baseUrl = process.env.BASE_URL || "https://grantradar-sable.vercel.app";
   const settingsUrl = `${baseUrl}/settings?token=${unsubscribeToken}`;
   const unsubscribeUrl = `${baseUrl}/unsubscribe?token=${unsubscribeToken}`;
+  const upgradeUrl = showUpgradeBanner ? `${baseUrl}/?upgrade=true` : null;
   const weekOf = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
-  const text = renderDigestText(orgName, grants, settingsUrl, unsubscribeUrl, trialBanner);
+  const html = renderDigestHtml(orgName, grants, settingsUrl, unsubscribeUrl, upgradeUrl);
+  const text = renderDigestText(orgName, grants, settingsUrl, unsubscribeUrl);
 
   const { data, error } = await getResend().emails.send({
     from: "GrantRadar <digest@grantradar.com>",
     to,
     subject: `GrantRadar \u2014 ${grants.length} grants for ${orgName} (Week of ${weekOf})`,
+    html,
     text,
+    headers: {
+      "List-Unsubscribe": `<${unsubscribeUrl}>`,
+      "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+    },
   });
 
   if (error) {
@@ -101,11 +102,11 @@ export async function sendDigestEmail(
   return data;
 }
 
-export async function sendConfirmationEmail(to: string, orgName: string): Promise<void> {
+export async function sendVerificationEmail(to: string, orgName: string, verifyUrl: string): Promise<void> {
   await getResend().emails.send({
     from: "GrantRadar <hello@grantradar.com>",
     to,
-    subject: `Welcome to GrantRadar, ${orgName}!`,
-    text: `You're signed up for GrantRadar.\n\nEvery Monday, we'll email you CA state grants that match your nonprofit's categories and geography.\n\nYour first digest arrives next Monday. If you signed up on a Monday morning, check your inbox later today.\n\nQuestions? Reply to this email.\n\n- GrantRadar`,
+    subject: `Verify your email \u2014 GrantRadar`,
+    text: `Hi ${orgName},\n\nPlease verify your email to start receiving your free weekly grant digest.\n\nClick here to verify: ${verifyUrl}\n\nIf you didn't sign up for GrantRadar, you can ignore this email.\n\n\u2014 GrantRadar`,
   });
 }

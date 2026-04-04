@@ -19,6 +19,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
+  // Idempotency: check if we've already processed this event
+  const { data: existing } = await supabase
+    .from("webhook_events")
+    .select("id")
+    .eq("stripe_event_id", event.id)
+    .single();
+
+  if (existing) {
+    return NextResponse.json({ received: true, duplicate: true });
+  }
+
+  // Log the event for idempotency
+  await supabase.from("webhook_events").insert({ stripe_event_id: event.id, event_type: event.type });
+
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const email = session.customer_email;
@@ -27,7 +41,11 @@ export async function POST(request: NextRequest) {
     if (email) {
       await supabase
         .from("organizations")
-        .update({ subscription_status: "active", stripe_customer_id: customerId })
+        .update({
+          subscription_status: "active",
+          stripe_customer_id: customerId,
+          tier: "pro",
+        })
         .eq("email", email);
     }
   }
@@ -38,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     await supabase
       .from("organizations")
-      .update({ subscription_status: "cancelled" })
+      .update({ subscription_status: "cancelled", tier: "free" })
       .eq("stripe_customer_id", customerId);
   }
 

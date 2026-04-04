@@ -48,11 +48,11 @@ export function SignupForm() {
 
   if (status === "success") {
     return (
-      <Card className="max-w-lg mx-auto border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
+      <Card className="max-w-lg mx-auto border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950">
         <CardContent className="p-8 text-center">
-          <h3 className="text-xl font-bold text-green-800 dark:text-green-200">You're in!</h3>
-          <p className="mt-2 text-green-700 dark:text-green-300">
-            Check your email for a confirmation. Your first grant digest arrives Monday.
+          <h3 className="text-xl font-bold text-emerald-800 dark:text-emerald-200">Check your email!</h3>
+          <p className="mt-2 text-emerald-700 dark:text-emerald-300">
+            We sent a verification link. Click it to start receiving your free weekly grant digest.
           </p>
         </CardContent>
       </Card>
@@ -107,10 +107,10 @@ export function SignupForm() {
           </div>
           {errorMsg && <p className="text-sm text-red-600">{errorMsg}</p>}
           <Button type="submit" className="w-full" disabled={status === "loading" || selectedCategories.length === 0}>
-            {status === "loading" ? "Signing up..." : "Start Free Trial (2 weeks)"}
+            {status === "loading" ? "Signing up..." : "Get Free Weekly Digest"}
           </Button>
           <p className="text-xs text-center text-muted-foreground">
-            Free for 2 weekly digests, then $49/mo. Cancel anytime.
+            Free forever. No credit card required.
           </p>
         </form>
       </CardContent>

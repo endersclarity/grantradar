@@ -9,7 +9,14 @@ export default async function UnsubscribePage({
   const { token } = await searchParams;
 
   if (!token) {
-    return <div className="p-8 text-center">Invalid unsubscribe link.</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <div className="max-w-md text-center space-y-2">
+          <h2 className="text-xl font-bold">Invalid unsubscribe link</h2>
+          <p className="text-muted-foreground">Check your email for a valid unsubscribe link.</p>
+        </div>
+      </div>
+    );
   }
 
   const { data: org } = await supabase
@@ -19,17 +26,36 @@ export default async function UnsubscribePage({
     .single();
 
   if (!org) {
-    return <div className="p-8 text-center">Invalid or expired unsubscribe link.</div>;
-  }
-
-  if (org.subscription_status === "cancelled") {
     return (
-      <div className="p-8 text-center">
-        <h2 className="text-xl font-bold">Already unsubscribed</h2>
-        <p className="text-muted-foreground mt-2">{org.name} is already unsubscribed from GrantRadar.</p>
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <div className="max-w-md text-center space-y-2">
+          <h2 className="text-xl font-bold">Link expired or invalid</h2>
+          <p className="text-muted-foreground">Check your email for a fresh unsubscribe link.</p>
+        </div>
       </div>
     );
   }
 
-  return <UnsubscribeConfirm token={token} orgName={org.name} />;
+  if (org.subscription_status === "cancelled") {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <div className="max-w-md text-center space-y-2">
+          <h2 className="text-xl font-bold">Already unsubscribed</h2>
+          <p className="text-muted-foreground">{org.name} is already unsubscribed from GrantRadar.</p>
+          <a href="/" className="text-primary hover:underline text-sm">Back to GrantRadar →</a>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="border-b bg-card">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <a href="/" className="text-xl font-bold text-foreground hover:underline">GrantRadar</a>
+        </div>
+      </header>
+      <UnsubscribeConfirm token={token} orgName={org.name} />
+    </div>
+  );
 }

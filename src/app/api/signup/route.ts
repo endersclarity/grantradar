@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { sendConfirmationEmail } from "@/lib/email";
+import { sendVerificationEmail } from "@/lib/email";
 import { GRANT_CATEGORIES } from "@/lib/constants";
 
 export async function POST(request: NextRequest) {
@@ -11,12 +11,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  // Validate email format
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
   }
 
-  // Length limits
   if (name.length > 200 || email.length > 200) {
     return NextResponse.json({ error: "Name or email too long" }, { status: 400 });
   }
@@ -25,7 +23,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Geography keywords too long" }, { status: 400 });
   }
 
-  // Validate categories
   const validCategories = categories.filter((c: string) =>
     (GRANT_CATEGORIES as readonly string[]).includes(c)
   );
@@ -33,7 +30,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "No valid categories selected" }, { status: 400 });
   }
 
-  // Parse geography keywords
   const geoKeywords = (geography_keywords || "")
     .split(",")
     .map((s: string) => s.trim())
@@ -46,8 +42,10 @@ export async function POST(request: NextRequest) {
       email,
       categories: validCategories,
       geography_keywords: geoKeywords,
+      tier: "free",
+      email_verified: false,
     })
-    .select()
+    .select("id, email_verify_token")
     .single();
 
   if (error) {
@@ -57,7 +55,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  await sendConfirmationEmail(email, name);
+  const baseUrl = process.env.BASE_URL || "https://grantradar-sable.vercel.app";
+  await sendVerificationEmail(email, name, `${baseUrl}/api/verify-email?token=${data.email_verify_token}`);
 
   return NextResponse.json({ success: true, id: data.id });
 }

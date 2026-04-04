@@ -9,7 +9,14 @@ export default async function SettingsPage({
   const { token } = await searchParams;
 
   if (!token) {
-    return <div className="p-8 text-center">Invalid settings link.</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <div className="max-w-md text-center space-y-2">
+          <h2 className="text-xl font-bold">Invalid settings link</h2>
+          <p className="text-muted-foreground">Check your email for a valid settings link.</p>
+        </div>
+      </div>
+    );
   }
 
   const { data: org } = await supabase
@@ -19,17 +26,31 @@ export default async function SettingsPage({
     .single();
 
   if (!org) {
-    return <div className="p-8 text-center">Invalid or expired link.</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <div className="max-w-md text-center space-y-2">
+          <h2 className="text-xl font-bold">Link expired or invalid</h2>
+          <p className="text-muted-foreground">Check your email for a fresh settings link.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-lg mx-auto p-8">
-      <h2 className="text-xl font-bold mb-4">Settings for {org.name}</h2>
-      <SettingsForm
-        token={token}
-        initialCategories={org.categories}
-        initialGeoKeywords={org.geography_keywords.join(", ")}
-      />
+    <div className="min-h-screen bg-background">
+      <header className="border-b bg-card">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <a href="/" className="text-xl font-bold text-foreground hover:underline">GrantRadar</a>
+        </div>
+      </header>
+      <div className="max-w-lg mx-auto p-8">
+        <h2 className="text-xl font-bold mb-4">Settings for {org.name}</h2>
+        <SettingsForm
+          token={token}
+          initialCategories={org.categories}
+          initialGeoKeywords={org.geography_keywords.join(", ")}
+        />
+      </div>
     </div>
   );
 }

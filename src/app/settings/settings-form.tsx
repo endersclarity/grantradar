@@ -61,8 +61,8 @@ export function SettingsForm({
         <Label htmlFor="geo">Geography Keywords</Label>
         <Input id="geo" value={geoKeywords} onChange={(e) => setGeoKeywords(e.target.value)} />
       </div>
-      <Button type="submit" className="w-full">
-        {saved ? "Saved!" : "Save Changes"}
+      <Button type="submit" className="w-full" disabled={categories.length === 0}>
+        {saved ? "Saved!" : categories.length === 0 ? "Select at least one category" : "Save Changes"}
       </Button>
     </form>
   );
