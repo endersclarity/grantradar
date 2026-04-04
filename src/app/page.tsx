@@ -108,12 +108,12 @@ export default async function Home({
             </div>
             <div className="space-y-3">
               <div>
-                <p className="text-xs font-bold text-amber-700">{"\u23F0"} CLOSING SOON</p>
+                <p className="text-xs font-bold text-amber-700 tracking-wide">CLOSING SOON</p>
                 <p className="text-sm font-medium mt-1">CA Arts Council: Arts & Cultural Organizations General Operating Relief</p>
                 <p className="text-xs text-muted-foreground">Deadline: Jun 5, 2026 · Up to $150,000</p>
               </div>
               <div className="border-t pt-3">
-                <p className="text-xs font-bold text-primary">{"\u2728"} NEW THIS WEEK</p>
+                <p className="text-xs font-bold text-primary tracking-wide">NEW THIS WEEK</p>
                 <p className="text-sm font-medium mt-1">Office of Historic Preservation: Heritage Fund Grant</p>
                 <p className="text-xs text-muted-foreground">Deadline: Sep 30, 2026 · Up to $750,000</p>
               </div>
@@ -130,10 +130,10 @@ export default async function Home({
             <h3 className="font-bold mb-1">Free</h3>
             <p className="text-2xl font-bold mb-3">$0<span className="text-sm font-normal text-muted-foreground">/forever</span></p>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2"><span className="text-primary mt-0.5">{"\u2713"}</span> Weekly grant digest every Monday</li>
-              <li className="flex items-start gap-2"><span className="text-primary mt-0.5">{"\u2713"}</span> Category + geography matching</li>
-              <li className="flex items-start gap-2"><span className="text-primary mt-0.5">{"\u2713"}</span> All {activeGrants}+ CA state grants</li>
-              <li className="flex items-start gap-2"><span className="text-primary mt-0.5">{"\u2713"}</span> Manage categories anytime</li>
+              <li className="flex items-start gap-2"><span className="text-primary mt-0.5 text-xs">&#9679;</span> Weekly grant digest every Monday</li>
+              <li className="flex items-start gap-2"><span className="text-primary mt-0.5 text-xs">&#9679;</span> Category + geography matching</li>
+              <li className="flex items-start gap-2"><span className="text-primary mt-0.5 text-xs">&#9679;</span> All {activeGrants}+ CA state grants</li>
+              <li className="flex items-start gap-2"><span className="text-primary mt-0.5 text-xs">&#9679;</span> Manage categories anytime</li>
             </ul>
           </div>
           <div className="rounded-xl border-2 border-primary bg-card p-6 relative">
@@ -141,10 +141,10 @@ export default async function Home({
             <h3 className="font-bold mb-1">Pro</h3>
             <p className="text-2xl font-bold mb-3">$19<span className="text-sm font-normal text-muted-foreground">/month</span></p>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2"><span className="text-primary mt-0.5">{"\u2713"}</span> Everything in Free</li>
-              <li className="flex items-start gap-2"><span className="text-primary mt-0.5">{"\u2713"}</span> AI Fit Score (0-100) per grant</li>
-              <li className="flex items-start gap-2"><span className="text-primary mt-0.5">{"\u2713"}</span> AI grant narrative drafts</li>
-              <li className="flex items-start gap-2"><span className="text-primary mt-0.5">{"\u2713"}</span> Daily new-grant alerts</li>
+              <li className="flex items-start gap-2"><span className="text-primary mt-0.5 text-xs">&#9679;</span> Everything in Free</li>
+              <li className="flex items-start gap-2"><span className="text-primary mt-0.5 text-xs">&#9679;</span> AI Fit Score (0-100) per grant</li>
+              <li className="flex items-start gap-2"><span className="text-primary mt-0.5 text-xs">&#9679;</span> AI grant narrative drafts</li>
+              <li className="flex items-start gap-2"><span className="text-primary mt-0.5 text-xs">&#9679;</span> Daily new-grant alerts</li>
             </ul>
           </div>
         </div>
