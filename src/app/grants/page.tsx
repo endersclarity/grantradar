@@ -3,12 +3,38 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-export default async function GrantsPage() {
-  const { data: grants } = await supabase
+const PAGE_SIZE = 25;
+
+export default async function GrantsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; category?: string }>;
+}) {
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page || "1", 10) || 1);
+  const categoryFilter = params.category || "";
+
+  let query = supabase
     .from("grants")
-    .select("id, title, agency, categories, application_deadline, deadline_date, est_amounts_text, status")
+    .select("id, title, agency, categories, application_deadline, deadline_date, est_amounts_text, status", { count: "exact" })
     .in("status", ["active", "forecasted"])
     .order("deadline_date", { ascending: true, nullsFirst: false });
+
+  if (categoryFilter) {
+    query = query.contains("categories", [categoryFilter]);
+  }
+
+  const { data: grants, count } = await query
+    .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+
+  const totalCount = count || 0;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+
+  function pageUrl(p: number) {
+    const parts = [`page=${p}`];
+    if (categoryFilter) parts.push(`category=${encodeURIComponent(categoryFilter)}`);
+    return `/grants?${parts.join("&")}`;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -26,7 +52,16 @@ export default async function GrantsPage() {
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold mb-2">California State Grants</h2>
-        <p className="text-muted-foreground mb-6">{grants?.length || 0} active grants from the CA Grants Portal</p>
+        <p className="text-muted-foreground mb-6">
+          {totalCount} active grants from the CA Grants Portal
+          {categoryFilter ? ` in ${categoryFilter}` : ""}
+        </p>
+
+        {categoryFilter && (
+          <Link href="/grants" className="inline-block mb-4 text-xs text-primary hover:underline">
+            Clear filter ×
+          </Link>
+        )}
 
         <div className="space-y-3">
           {(grants || []).map((grant) => {
@@ -67,6 +102,24 @@ export default async function GrantsPage() {
             );
           })}
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-8">
+            {page > 1 && (
+              <Link href={pageUrl(page - 1)} className="px-3 py-1.5 text-sm rounded-lg border hover:bg-secondary">
+                ← Prev
+              </Link>
+            )}
+            <span className="text-sm text-muted-foreground">
+              Page {page} of {totalPages}
+            </span>
+            {page < totalPages && (
+              <Link href={pageUrl(page + 1)} className="px-3 py-1.5 text-sm rounded-lg border hover:bg-secondary">
+                Next →
+              </Link>
+            )}
+          </div>
+        )}
       </main>
     </div>
   );
