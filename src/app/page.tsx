@@ -27,7 +27,7 @@ export default async function Home({
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
+      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-foreground">GrantRadar</h1>
@@ -39,7 +39,9 @@ export default async function Home({
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-12">
+      {/* Hero gradient */}
+      <div className="bg-gradient-to-b from-primary/[0.04] via-primary/[0.02] to-transparent">
+      <main className="max-w-4xl mx-auto px-4 py-16 relative">
         {/* Status banners */}
         {params.verified === "success" && (
           <div className="mb-8 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-center">
@@ -64,12 +66,12 @@ export default async function Home({
 
         {/* Hero */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold tracking-tight mb-4 text-foreground">
+          <h2 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 text-foreground text-balance">
             Know which grants are worth your time.
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Every Monday, get a free email with CA state grants that match your nonprofit.
-            Matched by category and geography. No login, no credit card, no catch.
+          <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
+            Free weekly email with CA state grants matched to your nonprofit.
+            No login. No credit card. No catch.
           </p>
         </div>
 
@@ -93,9 +95,11 @@ export default async function Home({
 
         {/* Signup form */}
         <SignupForm />
+      </main>
+      </div>
 
         {/* Digest preview */}
-        <div className="mt-16 mb-16">
+        <div className="max-w-4xl mx-auto px-4 py-16">
           <h3 className="text-center text-lg font-semibold mb-6">What your Monday email looks like</h3>
           <div className="max-w-lg mx-auto rounded-xl border bg-card p-6 shadow-sm">
             <div className="border-b pb-3 mb-3">
@@ -144,7 +148,6 @@ export default async function Home({
             </ul>
           </div>
         </div>
-      </main>
     </div>
   );
 }
