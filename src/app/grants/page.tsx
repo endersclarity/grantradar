@@ -41,7 +41,9 @@ export default async function GrantsPage() {
                   <div className="min-w-0">
                     <p className="font-medium text-sm truncate">{grant.title}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {grant.agency || "Unknown Agency"} · {grant.application_deadline || "Ongoing"}
+                      {grant.agency || "Unknown Agency"} · {grant.deadline_date
+                        ? new Date(grant.deadline_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                        : "Ongoing"}
                       {grant.est_amounts_text ? ` · ${grant.est_amounts_text}` : ""}
                     </p>
                     <div className="flex flex-wrap gap-1 mt-2">

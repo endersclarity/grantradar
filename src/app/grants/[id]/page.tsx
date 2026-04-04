@@ -35,7 +35,11 @@ export default async function GrantDetailPage({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="rounded-lg border bg-card p-4">
             <p className="text-xs text-muted-foreground">Deadline</p>
-            <p className="font-medium">{grant.application_deadline || "Ongoing"}</p>
+            <p className="font-medium">
+              {grant.deadline_date
+                ? new Date(grant.deadline_date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+                : "Ongoing"}
+            </p>
           </div>
           <div className="rounded-lg border bg-card p-4">
             <p className="text-xs text-muted-foreground">Estimated Amount</p>
