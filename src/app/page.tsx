@@ -66,7 +66,7 @@ export default async function Home({
 
         {/* Hero */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 text-foreground text-balance">
+          <h2 className="text-4xl sm:text-5xl font-normal tracking-tight mb-4 text-foreground text-balance font-[family-name:var(--font-heading)]">
             Know which grants are worth your time.
           </h2>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">

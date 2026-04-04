@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, DM_Serif_Display } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
+});
+
+const dmSerif = DM_Serif_Display({
+  variable: "--font-heading",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -31,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
+    <html lang="en" className={`${inter.variable} ${dmSerif.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans">
         {children}
         <footer className="border-t mt-auto">
