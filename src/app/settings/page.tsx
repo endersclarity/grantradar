@@ -21,7 +21,7 @@ export default async function SettingsPage({
 
   const { data: org } = await supabase
     .from("organizations")
-    .select("name, categories, geography_keywords, unsubscribe_token")
+    .select("name, categories, geography_keywords, mission_keywords, min_grant_amount, unsubscribe_token")
     .eq("unsubscribe_token", token)
     .single();
 
@@ -47,8 +47,10 @@ export default async function SettingsPage({
         <h2 className="text-xl font-bold mb-4">Settings for {org.name}</h2>
         <SettingsForm
           token={token}
-          initialCategories={org.categories}
-          initialGeoKeywords={org.geography_keywords.join(", ")}
+          initialCategories={org.categories || []}
+          initialGeoKeywords={(org.geography_keywords || []).join(", ")}
+          initialMissionKeywords={(org.mission_keywords || []).join(", ")}
+          initialMinAmount={org.min_grant_amount ? String(org.min_grant_amount) : ""}
         />
       </div>
     </div>
