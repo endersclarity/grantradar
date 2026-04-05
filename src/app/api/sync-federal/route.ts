@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
 
     // Transform to our schema
     const grants = allGrants.map((g: Record<string, unknown>) => ({
-      portal_id: 1000000 + (g.id as number), // offset to avoid collision with CA portal IDs
+      portal_id: -1 * (g.id as number), // negative IDs for federal grants to avoid collision with CA portal IDs
       grant_id: g.number as string || null,
       status: "active",
       agency: g.agency as string || null,
