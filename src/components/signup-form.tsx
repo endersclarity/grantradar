@@ -7,20 +7,56 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GRANT_CATEGORIES } from "@/lib/constants";
 
+interface EinData {
+  name: string;
+  city: string;
+  state: string;
+  ntee_code: string;
+  revenue: number | null;
+  categories: string[];
+  mission_keywords: string[];
+  suggested_min_amount: number | null;
+  geography: string | null;
+}
+
 export function SignupForm() {
+  const [ein, setEin] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [geoKeywords, setGeoKeywords] = useState("");
   const [missionKeywords, setMissionKeywords] = useState("");
   const [minAmount, setMinAmount] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "looking-up" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [einLooked, setEinLooked] = useState(false);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
     );
+  };
+
+  const lookupEin = async () => {
+    if (!ein.replace(/[-\s]/g, "")) return;
+    setStatus("looking-up");
+    setErrorMsg("");
+
+    const res = await fetch(`/api/lookup-ein?ein=${encodeURIComponent(ein)}`);
+    if (res.ok) {
+      const data: EinData = await res.json();
+      setName(data.name || "");
+      if (data.categories.length > 0) setSelectedCategories(data.categories);
+      if (data.mission_keywords.length > 0) setMissionKeywords(data.mission_keywords.join(", "));
+      if (data.geography) setGeoKeywords(data.geography);
+      if (data.suggested_min_amount) setMinAmount(String(data.suggested_min_amount));
+      setEinLooked(true);
+      setStatus("idle");
+    } else {
+      const err = await res.json();
+      setErrorMsg(err.error || "EIN not found");
+      setStatus("idle");
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,78 +106,108 @@ export function SignupForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* EIN Lookup */}
           <div className="space-y-2">
-            <Label htmlFor="name">Organization Name</Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required className="h-11" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11" />
-          </div>
-          <div className="space-y-2">
-            <Label>Grant Categories (select all that apply)</Label>
-            <div className="flex flex-wrap gap-2">
-              {GRANT_CATEGORIES.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => toggleCategory(cat)}
-                  className={`text-sm px-3 py-1.5 rounded-full border transition-colors min-h-[36px] ${
-                    selectedCategories.includes(cat)
-                      ? "bg-primary text-primary-foreground border-primary font-medium"
-                      : "bg-background border-border hover:bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
+            <Label htmlFor="ein">EIN (auto-fills everything)</Label>
+            <div className="flex gap-2">
+              <Input
+                id="ein"
+                value={ein}
+                onChange={(e) => setEin(e.target.value)}
+                placeholder="12-3456789"
+                className="h-11 flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={lookupEin}
+                disabled={status === "looking-up" || !ein.replace(/[-\s]/g, "")}
+                className="h-11 px-4 shrink-0"
+              >
+                {status === "looking-up" ? "Looking up..." : "Look up"}
+              </Button>
             </div>
-            {selectedCategories.length > 0 && (
-              <p className="text-xs text-primary">{selectedCategories.length} selected</p>
+            {einLooked && (
+              <p className="text-xs text-emerald-600 font-medium">
+                Found! Review and adjust below, then add your email.
+              </p>
             )}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="geo">Geography Keywords (comma-separated, optional)</Label>
-            <Input
-              id="geo"
-              value={geoKeywords}
-              onChange={(e) => setGeoKeywords(e.target.value)}
-              placeholder="e.g. Nevada County, Northern California, Statewide"
-              className="h-11"
-            />
             <p className="text-xs text-muted-foreground">
-              We'll match grants mentioning these areas. Leave blank to get statewide grants only.
+              Don't know your EIN? Fill in the fields manually below.
             </p>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="mission">What does your org do? (keywords that describe your mission)</Label>
-            <Input
-              id="mission"
-              value={missionKeywords}
-              onChange={(e) => setMissionKeywords(e.target.value)}
-              placeholder="e.g. historic preservation, cultural heritage, landmark"
-              className="h-11"
-            />
-            <p className="text-xs text-muted-foreground">
-              We'll prioritize grants that mention these terms. The more specific, the better.
-            </p>
+
+          <div className="border-t pt-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Organization Name</Label>
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required className="h-11" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11" />
+            </div>
+            <div className="space-y-2">
+              <Label>Grant Categories (select all that apply)</Label>
+              <div className="flex flex-wrap gap-2">
+                {GRANT_CATEGORIES.map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => toggleCategory(cat)}
+                    className={`text-sm px-3 py-1.5 rounded-full border transition-colors min-h-[36px] ${
+                      selectedCategories.includes(cat)
+                        ? "bg-primary text-primary-foreground border-primary font-medium"
+                        : "bg-background border-border hover:bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+              {selectedCategories.length > 0 && (
+                <p className="text-xs text-primary">{selectedCategories.length} selected</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="mission">Mission keywords (we'll prioritize grants mentioning these)</Label>
+              <Input
+                id="mission"
+                value={missionKeywords}
+                onChange={(e) => setMissionKeywords(e.target.value)}
+                placeholder="e.g. historic preservation, cultural heritage, landmark"
+                className="h-11"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="geo">Geography (optional)</Label>
+                <Input
+                  id="geo"
+                  value={geoKeywords}
+                  onChange={(e) => setGeoKeywords(e.target.value)}
+                  placeholder="e.g. Nevada County"
+                  className="h-11"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="minAmount">Min amount (optional)</Label>
+                <select
+                  id="minAmount"
+                  value={minAmount}
+                  onChange={(e) => setMinAmount(e.target.value)}
+                  className="w-full h-11 rounded-lg border border-input bg-background px-3 text-sm"
+                >
+                  <option value="">All amounts</option>
+                  <option value="5000">$5,000+</option>
+                  <option value="10000">$10,000+</option>
+                  <option value="25000">$25,000+</option>
+                  <option value="50000">$50,000+</option>
+                  <option value="100000">$100,000+</option>
+                </select>
+              </div>
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="minAmount">Minimum grant amount (optional)</Label>
-            <select
-              id="minAmount"
-              value={minAmount}
-              onChange={(e) => setMinAmount(e.target.value)}
-              className="w-full h-11 rounded-lg border border-input bg-background px-3 text-sm"
-            >
-              <option value="">Show all amounts</option>
-              <option value="5000">$5,000+</option>
-              <option value="10000">$10,000+</option>
-              <option value="25000">$25,000+</option>
-              <option value="50000">$50,000+</option>
-              <option value="100000">$100,000+</option>
-            </select>
-          </div>
+
           {errorMsg && <p className="text-sm text-red-600">{errorMsg}</p>}
           <Button type="submit" className="w-full h-12 text-base" disabled={status === "loading" || selectedCategories.length === 0}>
             {status === "loading" ? "Signing up..." : "Get Free Weekly Digest"}
