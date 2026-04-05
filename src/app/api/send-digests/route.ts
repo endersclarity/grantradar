@@ -29,6 +29,8 @@ export async function GET(request: NextRequest) {
       id: org.id,
       categories: org.categories,
       geography_keywords: org.geography_keywords,
+      mission_keywords: org.mission_keywords || [],
+      min_grant_amount: org.min_grant_amount || null,
     });
 
     if (matched.length === 0) {
