@@ -13,16 +13,33 @@ function truncate(text: string | null, len: number): string {
   return text.length > len ? text.slice(0, len - 3) + "..." : text;
 }
 
+function deadlineContext(grant: MatchedGrant): string {
+  if (!grant.deadline_date) return "Ongoing";
+  const deadline = new Date(grant.deadline_date);
+  const now = new Date();
+  const daysLeft = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  if (daysLeft < 0) return "Closed";
+  if (daysLeft <= 7) return `${daysLeft}d left \u2014 tight timeline`;
+  if (daysLeft <= 14) return `${daysLeft}d left \u2014 closing soon`;
+  if (daysLeft <= 30) return `${daysLeft}d left`;
+  if (daysLeft <= 90) return `${Math.floor(daysLeft / 7)}wk left \u2014 good runway`;
+  return `${Math.floor(daysLeft / 30)}mo left`;
+}
+
 function renderGrantCard(grant: MatchedGrant, showPurpose: boolean): string {
-  const deadline = grant.application_deadline || "Ongoing";
-  const amount = grant.est_amounts_text ? ` · ${escapeHtml(grant.est_amounts_text)}` : "";
+  const deadline = deadlineContext(grant);
+  const amount = grant.est_amounts_text ? ` \u00b7 ${escapeHtml(grant.est_amounts_text)}` : "";
   const purpose = showPurpose && grant.purpose ? `<p style="margin:4px 0 0;color:#6b7280;font-size:13px;">${escapeHtml(truncate(grant.purpose, 120))}</p>` : "";
-  const link = grant.grant_url ? `<a href="${escapeHtml(grant.grant_url)}" style="color:#0d9488;font-size:13px;text-decoration:underline;">View on CA Grants Portal →</a>` : "";
+  const link = grant.grant_url ? `<a href="${escapeHtml(grant.grant_url)}" style="color:#0d9488;font-size:13px;text-decoration:underline;">View on CA Grants Portal \u2192</a>` : "";
+  const matchTag = grant.relevanceScore > 0
+    ? `<span style="display:inline-block;padding:2px 8px;background:#ecfdf5;color:#047857;border-radius:4px;font-size:11px;font-weight:600;margin-bottom:4px;">${escapeHtml(grant.matchReason)}</span><br>`
+    : "";
 
   return `
     <tr><td style="padding:12px 0;border-bottom:1px solid #e5e7eb;">
+      ${matchTag}
       <p style="margin:0;font-weight:600;font-size:15px;color:#1e293b;">${escapeHtml(grant.title)}</p>
-      <p style="margin:4px 0 0;font-size:13px;color:#6b7280;">${escapeHtml(grant.agency || "Unknown Agency")} · Deadline: ${escapeHtml(deadline)}${amount}</p>
+      <p style="margin:4px 0 0;font-size:13px;color:#6b7280;">${escapeHtml(grant.agency || "Unknown Agency")} \u00b7 ${escapeHtml(deadline)}${amount}</p>
       ${purpose}
       ${link ? `<p style="margin:6px 0 0;">${link}</p>` : ""}
     </td></tr>`;

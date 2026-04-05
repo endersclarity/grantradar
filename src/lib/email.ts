@@ -14,12 +14,19 @@ function truncate(text: string | null, len: number): string {
 }
 
 function formatGrantLine(grant: MatchedGrant, includePurpose: boolean): string {
+  const daysLeft = grant.deadline_date
+    ? Math.ceil((new Date(grant.deadline_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null;
+  const deadlineStr = daysLeft !== null
+    ? (daysLeft <= 14 ? `${daysLeft}d left` : grant.application_deadline || "Ongoing")
+    : "Ongoing";
   const parts = [
     `  ${grant.agency || "Unknown Agency"}`,
-    `Deadline: ${grant.application_deadline || "Ongoing"}`,
+    `Deadline: ${deadlineStr}`,
   ];
   if (grant.est_amounts_text) parts.push(grant.est_amounts_text);
-  let line = `\u2022 ${grant.title}\n  ${parts.join(" | ")}`;
+  const matchLine = grant.relevanceScore > 0 ? `  [Matched: ${grant.matchReason}]\n` : "";
+  let line = `\u2022 ${grant.title}\n${matchLine}  ${parts.join(" | ")}`;
   if (includePurpose && grant.purpose) {
     line += `\n  ${truncate(grant.purpose, 120)}`;
   }
