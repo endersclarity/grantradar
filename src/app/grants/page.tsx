@@ -51,7 +51,7 @@ export default async function GrantsPage({
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        <h2 className="text-2xl font-bold mb-2">California State Grants</h2>
+        <h2 className="text-2xl font-bold mb-2">Grant Explorer</h2>
         <p className="text-muted-foreground mb-6">
           {totalCount} active grants from CA state + federal sources
           {categoryFilter ? ` in ${categoryFilter}` : ""}
