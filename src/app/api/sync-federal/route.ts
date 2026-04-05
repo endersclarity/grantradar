@@ -147,14 +147,15 @@ export async function GET(request: NextRequest) {
 
     // Upsert in batches
     let upserted = 0;
-    const batchSize = 200;
+    const errors: string[] = [];
+    const batchSize = 100;
     for (let i = 0; i < grants.length; i += batchSize) {
       const batch = grants.slice(i, i + batchSize);
       const { error } = await supabase
         .from("grants")
         .upsert(batch, { onConflict: "portal_id" });
       if (error) {
-        console.error("Upsert error:", error);
+        errors.push(`Batch ${i}: ${error.message}`);
       } else {
         upserted += batch.length;
       }
@@ -164,6 +165,7 @@ export async function GET(request: NextRequest) {
       source: "grants.gov",
       fetched: allGrants.length,
       upserted,
+      errors: errors.length > 0 ? errors : undefined,
     });
   } catch (err) {
     console.error("Federal sync error:", err);
