@@ -12,6 +12,8 @@ export function SignupForm() {
   const [email, setEmail] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [geoKeywords, setGeoKeywords] = useState("");
+  const [missionKeywords, setMissionKeywords] = useState("");
+  const [minAmount, setMinAmount] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -34,6 +36,8 @@ export function SignupForm() {
         email,
         categories: selectedCategories,
         geography_keywords: geoKeywords,
+        mission_keywords: missionKeywords,
+        min_grant_amount: minAmount ? parseInt(minAmount, 10) : null,
       }),
     });
 
@@ -108,6 +112,35 @@ export function SignupForm() {
             <p className="text-xs text-muted-foreground">
               We'll match grants mentioning these areas. Leave blank to get statewide grants only.
             </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="mission">What does your org do? (keywords that describe your mission)</Label>
+            <Input
+              id="mission"
+              value={missionKeywords}
+              onChange={(e) => setMissionKeywords(e.target.value)}
+              placeholder="e.g. historic preservation, cultural heritage, landmark"
+              className="h-11"
+            />
+            <p className="text-xs text-muted-foreground">
+              We'll prioritize grants that mention these terms. The more specific, the better.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="minAmount">Minimum grant amount (optional)</Label>
+            <select
+              id="minAmount"
+              value={minAmount}
+              onChange={(e) => setMinAmount(e.target.value)}
+              className="w-full h-11 rounded-lg border border-input bg-background px-3 text-sm"
+            >
+              <option value="">Show all amounts</option>
+              <option value="5000">$5,000+</option>
+              <option value="10000">$10,000+</option>
+              <option value="25000">$25,000+</option>
+              <option value="50000">$50,000+</option>
+              <option value="100000">$100,000+</option>
+            </select>
           </div>
           {errorMsg && <p className="text-sm text-red-600">{errorMsg}</p>}
           <Button type="submit" className="w-full h-12 text-base" disabled={status === "loading" || selectedCategories.length === 0}>

@@ -5,7 +5,7 @@ import { GRANT_CATEGORIES } from "@/lib/constants";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const { name, email, categories, geography_keywords } = body;
+  const { name, email, categories, geography_keywords, mission_keywords, min_grant_amount } = body;
 
   if (!name || !email || !categories || categories.length === 0) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -46,6 +46,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "This email is already registered. Check your inbox for a verification link." }, { status: 409 });
   }
 
+  const parsedMissionKeywords = (mission_keywords || "")
+    .split(",")
+    .map((s: string) => s.trim())
+    .filter(Boolean);
+
   const { data, error } = await supabase
     .from("organizations")
     .insert({
@@ -53,6 +58,8 @@ export async function POST(request: NextRequest) {
       email,
       categories: validCategories,
       geography_keywords: geoKeywords,
+      mission_keywords: parsedMissionKeywords,
+      min_grant_amount: min_grant_amount || null,
       tier: "free",
       email_verified: false,
     })
