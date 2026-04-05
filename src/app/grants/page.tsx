@@ -16,7 +16,7 @@ export default async function GrantsPage({
 
   let query = supabase
     .from("grants")
-    .select("id, title, agency, categories, application_deadline, deadline_date, est_amounts_text, status", { count: "exact" })
+    .select("id, title, agency, categories, application_deadline, deadline_date, est_amounts_text, status, source", { count: "exact" })
     .in("status", ["active", "forecasted"])
     .order("deadline_date", { ascending: true, nullsFirst: false });
 
@@ -53,7 +53,7 @@ export default async function GrantsPage({
       <main className="max-w-4xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold mb-2">California State Grants</h2>
         <p className="text-muted-foreground mb-6">
-          {totalCount} active grants from the CA Grants Portal
+          {totalCount} active grants from CA state + federal sources
           {categoryFilter ? ` in ${categoryFilter}` : ""}
         </p>
 
@@ -92,11 +92,23 @@ export default async function GrantsPage({
                       )}
                     </div>
                   </div>
-                  {isClosingSoon && (
-                    <span className="shrink-0 text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-medium">
-                      Closing soon
-                    </span>
-                  )}
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    {grant.source === "grants_gov" && (
+                      <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                        Federal
+                      </span>
+                    )}
+                    {grant.source === "ca_portal" && (
+                      <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-medium">
+                        CA State
+                      </span>
+                    )}
+                    {isClosingSoon && (
+                      <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-medium">
+                        Closing soon
+                      </span>
+                    )}
+                  </div>
                 </div>
               </Link>
             );

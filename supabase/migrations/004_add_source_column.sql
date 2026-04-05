@@ -1,0 +1,1 @@
+ALTER TABLE grants ADD COLUMN IF NOT EXISTS source text NOT NULL DEFAULT 'ca_portal';

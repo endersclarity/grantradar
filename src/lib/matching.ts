@@ -84,8 +84,7 @@ export async function matchGrantsForOrg(org: Organization): Promise<MatchedGrant
   const { data: grants, error } = await supabase
     .from("grants")
     .select("*")
-    .in("status", ["active", "forecasted"])
-    .contains("applicant_types", ["Nonprofit"]);
+    .in("status", ["active", "forecasted"]);
 
   if (error || !grants) return [];
 
