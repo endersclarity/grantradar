@@ -70,8 +70,8 @@ export default async function Home({
             Know which grants are worth your time.
           </h2>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Free weekly email with CA state grants matched to your nonprofit.
-            No login. No credit card. No catch.
+            Tell us what your nonprofit does. We'll score every CA state grant
+            by how well it fits your mission and email you the best matches every Monday.
           </p>
         </div>
 
@@ -109,16 +109,22 @@ export default async function Home({
             <div className="space-y-3">
               <div>
                 <p className="text-xs font-bold text-amber-700 tracking-wide">CLOSING SOON</p>
+                <span className="inline-block mt-1 px-1.5 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-semibold rounded">
+                  "cultural heritage" in purpose
+                </span>
                 <p className="text-sm font-medium mt-1">CA Arts Council: Arts & Cultural Organizations General Operating Relief</p>
-                <p className="text-xs text-muted-foreground">Deadline: Jun 5, 2026 · Up to $150,000</p>
+                <p className="text-xs text-muted-foreground">62 days left, good runway · Up to $150,000</p>
               </div>
               <div className="border-t pt-3">
                 <p className="text-xs font-bold text-primary tracking-wide">NEW THIS WEEK</p>
+                <span className="inline-block mt-1 px-1.5 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-semibold rounded">
+                  "historic preservation" in title
+                </span>
                 <p className="text-sm font-medium mt-1">Office of Historic Preservation: Heritage Fund Grant</p>
-                <p className="text-xs text-muted-foreground">Deadline: Sep 30, 2026 · Up to $750,000</p>
+                <p className="text-xs text-muted-foreground">5mo left · Up to $750,000</p>
               </div>
               <div className="border-t pt-3 text-xs text-muted-foreground">
-                + 6 more matching grants...
+                + 3 more matching grants...
               </div>
             </div>
           </div>
