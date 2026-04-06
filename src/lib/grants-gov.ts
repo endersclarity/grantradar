@@ -70,7 +70,8 @@ export async function searchOpportunities(): Promise<SearchHit[]> {
       }),
     });
 
-    const data = await res.json();
+    const json = await res.json();
+    const data = json.data || json; // API wraps results in a data envelope
     const hits: SearchHit[] = data.oppHits || [];
     allHits.push(...hits);
 
