@@ -118,6 +118,7 @@ export async function syncGrants(): Promise<{
   const { data: existingGrants } = await supabase
     .from("grants")
     .select("id, portal_id")
+    .eq("source", "ca_portal")
     .in("status", ["active", "forecasted"]);
 
   const toClose = (existingGrants || [])
