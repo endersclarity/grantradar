@@ -5,6 +5,10 @@
       "schedule": "0 13 * * *"
     },
     {
+      "path": "/api/sync-federal",
+      "schedule": "0 14 * * *"
+    },
+    {
       "path": "/api/send-digests",
       "schedule": "50 14 * * 1"
     }
