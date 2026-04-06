@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
       const batch = grantsToUpsert.slice(i, i + batchSize);
       const { error } = await supabase
         .from("grants")
-        .upsert(batch, { onConflict: "source,source_id" });
+        .upsert(batch, { onConflict: "source_id" });
       if (error) {
         errors.push(`Batch ${i}: ${error.message}`);
       } else {

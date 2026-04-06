@@ -106,7 +106,7 @@ export async function syncGrants(): Promise<{
   for (let i = 0; i < grantsToUpsert.length; i += 500) {
     const batch = grantsToUpsert.slice(i, i + 500);
     const { error } = await supabase.from("grants").upsert(batch, {
-      onConflict: "source,source_id",
+      onConflict: "source_id",
       ignoreDuplicates: false,
     });
     if (error) {
