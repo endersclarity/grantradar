@@ -24,6 +24,7 @@ interface Grant {
   deadline_date: string | null;
   grant_url: string | null;
   first_seen_at: string;
+  ai_tags: string[] | null;
 }
 
 export interface MatchedGrant extends Grant {
@@ -73,6 +74,18 @@ function scoreRelevance(grant: Grant, keywords: string[]): { score: number; reas
     } else if (descLower.includes(kwLower)) {
       score += 20;
       reasons.push(`"${kw}" in description`);
+    }
+  }
+
+  // Score against AI-generated tags
+  if ((grant as { ai_tags?: string[] | null }).ai_tags) {
+    const aiTags = (grant as { ai_tags?: string[] | null }).ai_tags!;
+    for (const kw of keywords) {
+      const kwLower = kw.toLowerCase();
+      if (aiTags.some((tag) => tag.toLowerCase().includes(kwLower))) {
+        score += 40;
+        reasons.push(`"${kw}" in AI tags`);
+      }
     }
   }
 
