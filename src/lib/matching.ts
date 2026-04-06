@@ -80,13 +80,24 @@ function scoreRelevance(grant: Grant, keywords: string[]): { score: number; reas
   return { score: Math.min(score, 100), reason: reasons.slice(0, 2).join(", ") };
 }
 
-export async function matchGrantsForOrg(org: Organization): Promise<MatchedGrant[]> {
-  const { data: grants, error } = await supabase
-    .from("grants")
-    .select("*")
-    .in("status", ["active", "forecasted"]);
+export async function matchGrantsForOrg(
+  org: Organization,
+  prefetchedGrants?: Grant[]
+): Promise<MatchedGrant[]> {
+  let allGrants: Grant[];
+  if (prefetchedGrants) {
+    allGrants = prefetchedGrants;
+  } else {
+    const { data: grants, error } = await supabase
+      .from("grants")
+      .select("*")
+      .in("status", ["active", "forecasted"]);
 
-  if (error || !grants) return [];
+    if (error) {
+      throw new Error(`Supabase query failed: ${error.message}`);
+    }
+    allGrants = (grants || []) as Grant[];
+  }
 
   const now = new Date();
   const fourteenDaysFromNow = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
@@ -94,7 +105,7 @@ export async function matchGrantsForOrg(org: Organization): Promise<MatchedGrant
 
   const matched: MatchedGrant[] = [];
 
-  for (const grant of grants as Grant[]) {
+  for (const grant of allGrants) {
     // Hard filter: category overlap
     if (!hasOverlap(grant.categories, org.categories)) continue;
 
