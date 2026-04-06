@@ -43,6 +43,7 @@ function parseDateLoose(value: string): string | null {
 function csvRowToGrant(row: CsvRow) {
   return {
     portal_id: parseInt(row.PortalID, 10),
+    source_id: row.PortalID,
     grant_id: row.GrantID || null,
     status: row.Status?.toLowerCase() || "active",
     agency: row.AgencyDept || null,
@@ -105,7 +106,7 @@ export async function syncGrants(): Promise<{
   for (let i = 0; i < grantsToUpsert.length; i += 500) {
     const batch = grantsToUpsert.slice(i, i + 500);
     const { error } = await supabase.from("grants").upsert(batch, {
-      onConflict: "portal_id",
+      onConflict: "source,source_id",
       ignoreDuplicates: false,
     });
     if (error) {
