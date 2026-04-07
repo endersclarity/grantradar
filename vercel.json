@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/sync-federal",
-      "schedule": "0 14 * * *"
+      "schedule": "0 14 * * 0"
     },
     {
       "path": "/api/send-digests",
