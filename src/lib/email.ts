@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import type { MatchedGrant } from "./matching";
 import { renderDigestHtml } from "./email-templates";
+import type { SyncGrantResult } from "./grants";
 
 let _resend: Resend | null = null;
 function getResend(): Resend {
@@ -107,6 +108,87 @@ export async function sendDigestEmail(
   }
 
   return data;
+}
+
+export interface SyncReport {
+  source: string;
+  timestamp: string;
+  fetched: number;
+  newGrants: SyncGrantResult[];
+  closed: number;
+  errors: string[];
+}
+
+export async function sendSyncReportEmail(report: SyncReport): Promise<void> {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!botToken || !chatId) {
+    console.error("Sync report: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not set");
+    return;
+  }
+
+  const hasErrors = report.errors.length > 0;
+  const newCount = report.newGrants.length;
+  const time = new Date(report.timestamp).toLocaleString("en-US", {
+    timeZone: "America/Los_Angeles",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  const statusIcon = hasErrors ? "\u26A0\uFE0F" : "\u2705";
+
+  let text = `${statusIcon} <b>${report.source}</b> synced at ${time}\n`;
+  text += `Fetched: ${report.fetched.toLocaleString()} | New: ${newCount} | Closed: ${report.closed} | Errors: ${report.errors.length}\n`;
+
+  if (hasErrors) {
+    text += `\n<b>ERRORS:</b>\n`;
+    for (const err of report.errors) {
+      text += `\u2022 ${err}\n`;
+    }
+  }
+
+  if (newCount > 0) {
+    const showGrants = report.newGrants.slice(0, 10);
+    text += `\n<b>NEW GRANTS:</b>\n\n`;
+    for (const g of showGrants) {
+      text += `\u2022 <b>${escapeHtml(g.title)}</b>\n`;
+      text += `  ${escapeHtml(g.agency)}`;
+      if (g.deadline) text += ` | Deadline: ${g.deadline}`;
+      text += `\n`;
+      if (g.url) text += `  \u2192 ${g.url}\n`;
+      text += `\n`;
+    }
+    if (newCount > 10) {
+      text += `... and ${newCount - 10} more\n`;
+    }
+  } else if (!hasErrors) {
+    text += `\nNo new grants this sync. All quiet.\n`;
+  }
+
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        parse_mode: "HTML",
+      }),
+    });
+    if (!res.ok) {
+      console.error("Telegram sync report failed:", await res.text());
+    }
+  } catch (err) {
+    console.error("Telegram sync report error:", err);
+  }
+}
+
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 export async function sendVerificationEmail(to: string, orgName: string, verifyUrl: string): Promise<void> {

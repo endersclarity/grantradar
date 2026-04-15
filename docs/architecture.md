@@ -67,31 +67,61 @@ flowchart TD
     Stripe -.->|Future| Orgs
 ```
 
-## Current State (2026-04-05)
+## Current State (2026-04-11)
 
 | Metric | Value |
 |--------|-------|
-| Data sources | CA Grants Portal + Grants.gov |
-| Active grants | ~160 CA + ~2,800 federal |
-| Total grants in DB | ~4,700+ |
+| Data sources | CA Grants Portal + Grants.gov API + Candid Premium (2 downloads) |
+| Grants in DB | 1,144 (100% AI-classified) |
+| Funders in DB | 648 (100% AI-classified, fit-scored 0-100) |
+| Candid downloads used | ~1,544 of 5,000/month |
 | Orgs signed up | 1 (test) |
 | Revenue | $0 |
 | Pro tier | Stub (coming soon badge) |
-| AI features | AI tag classification (via Claude Code) |
+| RLS | Enabled on all tables (migration 006) |
+| AI features | Grant classification (agency/category patterns), Funder fit scoring (rule-based: subject + geography + foundation type) |
+
+## Database Tables
+
+| Table | Records | Source | Key Columns |
+|-------|---------|--------|-------------|
+| grants | 1,144 | Grants.gov API + CA Grants CSV | title, agency, synopsis, ai_tags, ai_summary, ai_classified_at |
+| organizations | 1 | Signup form | name, email, categories, mission_keywords |
+| digests | 0 | Send-digest cron | org_id, grant_count, sent_at |
+| funders | 648 | Candid Premium CSV | name, ein, subject_areas, mission_statement, total_assets, ai_fit_score, ai_tags |
 
 ## What Actually Works
 1. Daily CSV sync from CA portal → Supabase
-2. EIN lookup → auto-fills org profile from IRS data
-3. Keyword relevance scoring in matching engine
-4. Weekly email digest with match reasons + deadline context
-5. Settings management via token auth (no passwords)
-6. Pagination, date formatting, mobile responsive
+2. Grants.gov API ingestor (search2 + fetchOpportunity, unauthenticated)
+3. EIN lookup → auto-fills org profile from IRS data
+4. Keyword relevance scoring in matching engine
+5. Weekly email digest with match reasons + deadline context
+6. Settings management via token auth (no passwords)
+7. Pagination, date formatting, mobile responsive
+8. Grant classification — 100% coverage via auto-classify pipeline
+9. Funder ingest + classification — Candid CSV → candid_ingest.py → funder_classify.py
+10. RLS on all tables (anon key can only read grants + funders)
+11. Cross-reference against NSH Notion data (9/131 overlap on first download)
 
 ## What Doesn't Exist Yet
-1. AI fit scoring (Pro tier feature)
-2. AI grant narrative drafts (Pro tier feature)
-3. Multiple data sources (federal, private foundations)
-4. Grant bookmarking / pipeline tracking
-5. Dashboard (authenticated browse experience)
-6. Any paying customers
-7. SPF/DKIM for email deliverability
+1. Automated recurring sync (Grants.gov incremental by date, CA Grants CSV diff)
+2. Funder-to-grant relationship table (which funder gave which grant)
+3. Admin dashboard as real Next.js route (mockup at ~/vault/dev/grantradar-admin-dashboard.html)
+4. AI fit scoring exposed in web UI (Pro tier feature — data exists in Supabase)
+5. AI grant narrative drafts (Pro tier feature)
+6. Grant bookmarking / pipeline tracking
+7. Dashboard (authenticated browse experience)
+8. Any paying customers
+9. SPF/DKIM for email deliverability (needs grantradar.com DNS)
+10. Stripe repricing ($49→$19)
+
+## Development Timeline
+
+| Date | Milestone |
+|------|-----------|
+| 2026-04-03 | Conceived after Zenvoice failed forcing questions. Design doc + 3 adversarial review rounds. |
+| 2026-04-04 | Built from zero to deployed in one day. V1 at $49/mo. Pivoted to free+$19/mo Pro. |
+| 2026-04-05 | Phase A deployed. Pipeline expansion spec (7 reviews). CA sync bug found (closing federal grants). |
+| 2026-04-06 | Federal ingestor + AI classification shipped. /grants skill + /devcock created. Candid Premium access confirmed. |
+| 2026-04-07 | Admin dashboard mockup. Candid: 767 broad + 134 refined prospect downloads. Classification backfill started (8.9%). |
+| 2026-04-11 | Classification backfill completed (100%). RLS migration 006 + funders table 007 applied via Supabase MCP. 131 Candid funders ingested + classified. Cross-referenced against all Notion sources (121 new). Second Candid download: 643 arts/culture + women's rights funders. Total: 648 funders, all classified. flush.py hardened (hash-based change detection, programmatic merge). |

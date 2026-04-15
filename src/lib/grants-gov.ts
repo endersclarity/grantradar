@@ -65,6 +65,7 @@ export async function searchOpportunities(): Promise<SearchHit[]> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         oppStatuses: "posted",
+        fundingCategories: "AR|HU|CD|NR",
         rows: pageSize,
         startRecordNum: startRecord,
       }),
@@ -183,7 +184,6 @@ export function transformHit(hit: SearchHit, detail: OpportunityDetail | null) {
     detail_hash: detail ? computeDetailHash(hit, detail) : null,
     detail_fetched: !!detail,
     detail_fetched_at: detail ? new Date().toISOString() : null,
-    raw_json: hit,
     last_seen_in_sync: new Date().toISOString(),
   };
 }
