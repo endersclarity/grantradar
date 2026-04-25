@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabaseServer as supabase } from "@/lib/supabase-server";
 import { sendVerificationEmail } from "@/lib/email";
 import { GRANT_CATEGORIES } from "@/lib/constants";
 

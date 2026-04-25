@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabaseServer as supabase } from "@/lib/supabase-server";
 import { UnsubscribeConfirm } from "./unsubscribe-confirm";
 
 export default async function UnsubscribePage({
