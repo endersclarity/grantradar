@@ -1,5 +1,5 @@
 import { SignupForm } from "@/components/signup-form";
-import { supabase } from "@/lib/supabase";
+import { supabaseServer as supabase } from "@/lib/supabase-server";
 
 export const dynamic = "force-dynamic";
 

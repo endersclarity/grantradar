@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { syncGrants } from "@/lib/grants";
 import { sendSyncReportEmail } from "@/lib/email";
-import { supabase } from "@/lib/supabase";
+import { supabaseServer as supabase } from "@/lib/supabase-server";
 
 export async function GET(request: NextRequest) {
   // Verify cron secret (Vercel sends this header for cron jobs)

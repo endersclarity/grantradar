@@ -1,5 +1,5 @@
 import { parse } from "csv-parse/sync";
-import { supabase } from "./supabase";
+import { supabaseServer as supabase } from "./supabase-server";
 import { CA_GRANTS_CSV_URL, MIN_CSV_ROWS_SAFETY } from "./constants";
 
 // Only keep grants in these CA categories — everything else is irrelevant to NSH
