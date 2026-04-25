@@ -79,3 +79,26 @@ Organized ~/code/starhouse/ — moved loose Candid CSVs to data/candid/, archive
 ### What this means for the product
 
 GrantRadar now has two real data tables. 1,144 classified grants + 648 classified funders. The funder data enables the Pro tier feature (AI fit scoring) — the scores exist, they just need a UI. No automated sync yet for any source. Stripe still says $49/mo.
+
+## 2026-04-24 — Day 21: Migration 010 lockdown applied
+
+Applied `supabase/migrations/010_lockdown_anon_access.sql` to grantradar prod (`ppsexpgopqzshkcknxqt`, `us-west-1`) via Supabase MCP `apply_migration` after explicit session authorization. Single transaction, additive only.
+
+Pre-state matched the audit captured in `docs/supabase-remediation-checklist.md` §1: `sync_runs` and `webhook_events` had RLS off and broad anon/authenticated DML grants; the other four public tables (`grants`, `funders`, `organizations`, `digests`) were RLS-on but role grants had never been stripped.
+
+Verification queries (all PASS):
+
+- **V1 — RLS status.** All 6 public tables now `rowsecurity = true` (`digests`, `funders`, `grants`, `organizations`, `sync_runs`, `webhook_events`).
+- **V2 — Supabase security advisor.** `lints: []` — zero findings. Previously: 2 ERROR-level `rls_disabled_in_public` lints on `sync_runs` and `webhook_events`.
+- **V3 — Deny-all policies.** 4 policies each on `sync_runs` and `webhook_events` (SELECT/INSERT/UPDATE/DELETE), all with `qual = 'false'` or `with_check = 'false'`. Pattern matches migration 006 on `public.digests`.
+- **V4 — Role grants.** `anon` and `authenticated` have `SELECT` only on `public.grants` and `public.funders`. Zero privileges on `organizations`, `digests`, `sync_runs`, `webhook_events`.
+
+App posture: all writes route through `service_role` (boundary verified by `scripts/check_supabase_boundaries.sh` immediately before apply — 11 checks PASS). RLS denial cannot break anon paths because there are no anon paths past SELECT on grants/funders. App is essentially idle (6 lifetime `sync_runs` rows, 0 `webhook_events` rows, 1 `organizations` row) so no apply window negotiation was needed.
+
+Branching not used. Free-tier Supabase does not support branches; `list_branches` errored. Best-practice fallback: rely on the migration's BEGIN/COMMIT wrapper, V-query verification, and the in-file rollback block. None of those rollback steps were triggered.
+
+The vault NSH Phase 1 apply gate #1 (grantradar 010 applied cleanly) is now unblocked. Remaining NSH apply gates: service_role manual fetch, backup posture verification on `nsh-operating`, trigger-error monitoring posture decision, in-session apply authorization.
+
+Drift noted (not addressed in this session): `supabase/migrations/008_sync_runs_and_indexes.sql` and `009_triage_column.sql` exist on disk but are NOT recorded in `supabase_migrations.schema_migrations`. The DB has the schema (`sync_runs` table exists; `grants.triage` column exists with the expected CHECK constraint) — those migrations were applied via raw `execute_sql` at some point. Cosmetic; resolve in a future session by either committing 008/009 paper-trail rows into the migrations registry or by re-running them with `IF NOT EXISTS` guards confirmed.
+
+Branch state at apply time: `chore/supabase-lockdown` (local, not pushed) carries two commits — `9517d19 refactor(supabase): split client into server/browser boundary` (25 files, +1005/-35) and `60bbe0a feat(supabase): add migration 010 anon/authenticated lockdown` (+216). Push, PR, Vercel preview, post-apply HTTP smoke tests against `/api/sync-grants` + `/api/webhooks/stripe` + `/grants` + `/settings` all still pending; the V-queries above cover the database-side verification only.
